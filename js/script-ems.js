@@ -9,6 +9,8 @@ let employees = [
 
 // CHECK TO SEE IF STORAGE OBJECT EXISTS WHEN THE PAGE LOADS
 // IF DOES, RETURN STORAGE OBJECT INTO ARRAY INSTEAD OF POPULATED ARRAY
+// the extra check prevents a case where all employees are deleted but the string stored in localStorage still has array brackets and isn't "empty"
+// if all employees are deleted it will re-populate on page load
 if(localStorage.people && JSON.parse(localStorage.people).length !== 0){
     employees = JSON.parse(localStorage.getItem('people'));
     console.log("employees array found in local storage: "+ employees);
@@ -48,14 +50,14 @@ form.addEventListener('submit', (e) => {
 });
 
 // DELETE EMPLOYEE
+// adding event listener to created delete button and passing in the array that builds the given TR
 function delEventListener(empTable,delArray) {
     empTable.addEventListener('click', (e) => {
         // CONFIRM THE DELETE
         if(confirm('Are you sure you want to delete this employee?')) {
             // GET THE SELECTED ROWINDEX FOR THE TR (PARENTNODE.PARENTNODE)
-            
             let delArrayIndex = employees.indexOf(delArray);
-            console.log(`Employee Index: ${delArrayIndex}`);
+            //console.log(`Employee Index: ${delArrayIndex}`); //test log
             // REMOVE EMPLOYEE FROM ARRAY
             employees.splice(delArrayIndex, 1);
             // BUILD THE GRID
@@ -75,28 +77,26 @@ function buildGrid(empArray) {
     // LOOP THROUGH THE ARRAY OF EMPLOYEES
     // REBUILDING THE ROW STRUCTURE
     for(let i of empArray) {
-        //console.log("i Loop value: "+i);
+        //console.log("i Loop value: "+i); //test code
+        //iterating through first array level
         const row = document.createElement("tr");
         for(let j of i) {
-            //console.log("j Loop value: "+j);
+            //console.log("j Loop value: "+j); //test code
+            //create TD element, iterate through second array elements. append each to unique TD. Append TD to TR
             const cell = document.createElement("td");
             const cellVal = document.createTextNode(`${j}`);
             cell.appendChild(cellVal);
             row.appendChild(cell);
         }
-        //console.log("row: " + row);
         //CREATE THE DELETE BUTTON
         let deleteBtn = document.createElement('button');
-        //add event listener
         delEventListener(deleteBtn,i);
-        // add classes
         deleteBtn.className = `btn btn-danger btn-sm float-end delete`;
-        // create text to append to button
         let textDelete = document.createTextNode('X');
-        // append text to delete button
         deleteBtn.appendChild(textDelete);
         //append delete button to 'tr'
         row.appendChild(deleteBtn);
+        //append fully completed row with TR/TD's/Delete to the newly created tbody.
         tbody.appendChild(row);
     } 
     // BIND THE TBODY TO THE EMPLOYEE TABLE
@@ -104,7 +104,7 @@ function buildGrid(empArray) {
     // UPDATE EMPLOYEE COUNT
     if((empArray.length) === 0) {
         document.querySelector('#empCount').innerHTML = "";
-    }else { //if not empty, set value equal to number of entries
+    }else {
         document.querySelector('#empCount').innerHTML = `(${empArray.length})`;
     } 
     // STORE THE ARRAY IN STORAGE
